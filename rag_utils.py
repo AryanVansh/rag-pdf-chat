@@ -50,5 +50,15 @@ def rewrite_query(original_query: str, llm) -> str:
 # Create a query engine
 def create_query_engine(index, llm):
     retriever = VectorIndexRetriever(index=index, similarity_top_k=6)
-    reranker = SentenceTransformerRerank(top_n=3, model="cross-encoder/ms-marco-MiniLM-L-6-v2")
-    return RetrieverQueryEngine(retriever=retriever, node_postprocessors=[reranker])
+    reranker = SentenceTransformerRerank(
+        top_n=3,
+        model="cross-encoder/ms-marco-MiniLM-L-6-v2"
+    )   
+
+    query_engine = RetrieverQueryEngine.from_args(
+        retriever=retriever,
+        node_postprocessors=[reranker],
+        llm=llm  # <- force Groq here
+    )
+    return query_engine
+
