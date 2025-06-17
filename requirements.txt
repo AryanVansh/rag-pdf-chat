@@ -1,0 +1,6 @@
+streamlit
+llama-index
+chromadb
+python-dotenv
+sentence-transformers
+groq
