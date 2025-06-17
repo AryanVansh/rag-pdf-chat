@@ -8,7 +8,9 @@ from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.postprocessor import SentenceTransformerRerank
 from llama_index.core.settings import Settings
-from chromadb import PersistentClient
+from llama_index.vector_stores.faiss import FaissVectorStore
+import faiss
+
 
 # Constants
 UPLOAD_DIR = "./pdfs"
@@ -21,9 +23,9 @@ def load_and_index_pdfs():
     embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
     Settings.embed_model = embed_model
 
-    chroma_client = PersistentClient(path=PERSIST_DIR)
-    collection = chroma_client.get_or_create_collection("pdf_rag")
-    vector_store = ChromaVectorStore(chroma_collection=collection)
+    faiss_index = faiss.IndexFlatL2(768)
+    vector_store = FaissVectorStore(faiss_index=faiss_index)
+
 
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)

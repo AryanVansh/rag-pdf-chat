@@ -2,8 +2,8 @@ streamlit
 llama-index>=0.10.28
 llama-index-embeddings-huggingface
 llama-index-llms-groq
-llama-index-vector-stores-chroma
-chromadb
+llama-index-vector-stores-faiss
+faiss-cpu
 sentence-transformers
 python-dotenv
 protobuf==3.20.3
