@@ -2,19 +2,16 @@ import os
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.embeddings.huggingface import HuggingFaceEmbedding
 from llama_index.llms.groq import Groq
-from llama_index.vector_stores.chroma import ChromaVectorStore
+from llama_index.vector_stores.faiss import FaissVectorStore
 from llama_index.core.storage import StorageContext
 from llama_index.core.query_engine import RetrieverQueryEngine
 from llama_index.core.retrievers import VectorIndexRetriever
 from llama_index.core.postprocessor import SentenceTransformerRerank
 from llama_index.core.settings import Settings
-from llama_index.vector_stores.faiss import FaissVectorStore
 import faiss
-
 
 # Constants
 UPLOAD_DIR = "./pdfs"
-PERSIST_DIR = "./chroma_store"
 
 # Load and index PDFs
 def load_and_index_pdfs():
@@ -23,21 +20,21 @@ def load_and_index_pdfs():
     embed_model = HuggingFaceEmbedding(model_name="BAAI/bge-base-en-v1.5")
     Settings.embed_model = embed_model
 
-    faiss_index = faiss.IndexFlatL2(768)
+    faiss_index = faiss.IndexFlatL2(768)  # 768 for BAAI/bge-base-en-v1.5
     vector_store = FaissVectorStore(faiss_index=faiss_index)
-
 
     storage_context = StorageContext.from_defaults(vector_store=vector_store)
     index = VectorStoreIndex.from_documents(documents, storage_context=storage_context)
 
     llm = get_llm()
-    Settings.llm = llm  
+    Settings.llm = llm
     return index, llm
 
 
 # Initialize GROQ LLM
 def get_llm():
     return Groq(model="llama3-70b-8192", api_key=os.getenv("GROQ_API_KEY"))
+
 
 # Rewrite the user query using the LLM
 def rewrite_query(original_query: str, llm) -> str:
@@ -48,6 +45,7 @@ def rewrite_query(original_query: str, llm) -> str:
     )
     response = llm.complete(prompt)
     return response.text.strip()
+
 
 # Create a query engine
 def create_query_engine(index, llm):
